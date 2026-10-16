@@ -1,0 +1,7 @@
+{
+  "basic_owner": "bob",
+  "created_owner": "bob",
+  "updated_owner": "bob",
+  "deleted": true,
+  "oauth_owner": "alice"
+}

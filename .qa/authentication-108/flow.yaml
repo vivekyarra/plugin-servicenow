@@ -1,0 +1,69 @@
+id: servicenow-authentication-smoke
+namespace: company.team
+
+tasks:
+  - id: read_alice
+    type: io.kestra.plugin.servicenow.Get
+    uri: http://host.docker.internal:18089
+    username: alice
+    password: alice-password
+    clientId: alice-client
+    clientSecret: alice-secret
+    table: incident
+
+  - id: create_bob
+    type: io.kestra.plugin.servicenow.Post
+    uri: http://host.docker.internal:18089
+    username: bob
+    password: bob-password
+    clientId: bob-client
+    clientSecret: bob-secret
+    table: incident
+    data:
+      short_description: Authentication smoke test
+
+  - id: update_bob
+    type: io.kestra.plugin.servicenow.Update
+    uri: http://host.docker.internal:18089
+    username: bob
+    password: bob-password
+    clientId: bob-client
+    clientSecret: bob-secret
+    table: incident
+    sysId: "{{ outputs.create_bob.result.sys_id }}"
+    data:
+      short_description: Updated through the shared request method
+
+  - id: delete_bob
+    type: io.kestra.plugin.servicenow.Delete
+    uri: http://host.docker.internal:18089
+    username: bob
+    password: bob-password
+    clientId: bob-client
+    clientSecret: bob-secret
+    table: incident
+    sysId: "{{ outputs.create_bob.result.sys_id }}"
+
+  - id: read_basic
+    type: io.kestra.plugin.servicenow.Get
+    uri: http://host.docker.internal:18089
+    username: bob
+    password: bob-password
+    table: incident
+
+outputs:
+  - id: oauth_owner
+    type: STRING
+    value: "{{ outputs.read_alice.results[0].owner }}"
+  - id: created_owner
+    type: STRING
+    value: "{{ outputs.create_bob.result.owner }}"
+  - id: updated_owner
+    type: STRING
+    value: "{{ outputs.update_bob.result.owner }}"
+  - id: basic_owner
+    type: STRING
+    value: "{{ outputs.read_basic.results[0].owner }}"
+  - id: deleted
+    type: BOOL
+    value: "{{ outputs.delete_bob.deleted }}"
